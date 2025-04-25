@@ -25,24 +25,20 @@ mkdir -p "$output_dir"
 find "$input_dir" -type f -print0 | while IFS= read -r -d '' file; do
   rel="${file#"$input_dir"/}"
   depth=$(grep -o "/" <<< "$rel" | wc -l)
-
-  # если нет max_depth ИЛИ глубина больше max_depth — кладём в корень
-  if [[ -z "$max_depth" ]] || [[ "$depth" -gt "$max_depth" ]]; then
+  if [[ -n "$max_depth" && "$depth" -gt "$max_depth" ]]; then
     target="$output_dir"
   else
     target="$output_dir/$(dirname "$rel")"
     mkdir -p "$target"
   fi
-
   name="$(basename "$file")"
   base="${name%.*}"
   ext="${name##*.}"
   dest="$target/$name"
-  cnt=1
+  count=1
   while [[ -e "$dest" ]]; do
-    dest="$target/${base}_${cnt}.${ext}"
-    ((cnt++))
+    dest="$target/${base}_${count}.${ext}"
+    ((count++))
   done
-
   cp "$file" "$dest"
 done
